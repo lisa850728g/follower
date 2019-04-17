@@ -5,24 +5,24 @@
     <title>Flask DEMO</title>
 </head>
 <body>
-    <div class=”header”>
+    <div class="header">
         {%if islogin == '1' %}
         <h1>Welcome ,{{username}}!</h1>
         {%else%}
         <h1>{{username}}!</h1>
         {%endif%}
-        <div class=”nav”>
+        <div class="nav">
             <ul>
                 {%for nav in nav_list%}
-                <li><a href=”{{nav}}”>{{nav}}</a></li>
+                <li><a href="{{nav}}">{{nav}}</a></li>
                 {%endfor%}
             </ul>
         </div>
     </div>
-    <div class=”container”>
-        <div class=”item”>
+    <div class="container">
+        <div class="item">
             <h1>{{blog['title']}}</h1>
-            <div class=”content”>
+            <div class="content">
             </div>
         </div>
     </div>

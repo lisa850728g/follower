@@ -3,7 +3,7 @@
 
 from flask import Flask, render_template, url_for, request,redirect,make_response,session
 import pymongo
-from pymongo import MongoClient, InsertOne
+from pymongo import MongoClient
 
 app = Flask(__name__)
 user_list = [u'jim',u'max',u'py']
@@ -30,8 +30,25 @@ def regist():
         client.close()
         return "user '%s' regist ok!" % request.form['username']
     else:
-        #request.args[‘username’]
         return render_template('regis.html')
+
+@app.route('/login/', methods=['GET','POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        client = MongoClient('localhost', 27017)
+        db = client['information']
+        userlist = db.user.distinct['account']
+        if username in userlist :
+            response = make_response(redirect('/'))
+            response.set_cookie('username', value=username, max_age=300)
+            session['islogin'] = '1'
+            return response
+        else:
+            session['islogin'] = '0'
+            return redirect('/login/')
+    else:
+        return render_template('login.html')
 
 if __name__ == '__main__':
     app.run(debug=True,host='0.0.0.0',port=5000)
