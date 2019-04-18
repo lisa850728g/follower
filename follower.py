@@ -6,7 +6,7 @@ import pymongo
 from pymongo import MongoClient
 
 app = Flask(__name__)
-user_list = [u'jim',u'max',u'py']
+app.secret_key = "dk54pgk42u/4nau4ul4g"
 
 @app.route('/')
 def index():
@@ -28,7 +28,7 @@ def regist():
         tableUsr = client['information'].user
         tableUsr.insert_one({'account': username, 'password': userpwd, 'sex': usersex})
         client.close()
-        return "user '%s' regist ok!" % request.form['username']
+        return "註冊成功"
     else:
         return render_template('regis.html')
 
@@ -36,17 +36,22 @@ def regist():
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
+        userpwd = request.form.get('userpwd')
         client = MongoClient('localhost', 27017)
-        db = client['information']
-        userlist = db.user.distinct['account']
+        tableUsr = client['information'].user
+        userlist = tableUsr.distinct('account')
         if username in userlist :
-            response = make_response(redirect('/'))
-            response.set_cookie('username', value=username, max_age=300)
-            session['islogin'] = '1'
-            return response
+            if userpwd == tableUsr.find_one({'account': username})['password'] :
+                response = make_response(redirect('/'))
+                response.set_cookie('username', value=username, max_age=300)
+                session['islogin'] = '1'
+                return response
+            else:
+                session['islogin'] = '0'
+                return render_template('login.html', message="密碼輸入錯誤")
         else:
             session['islogin'] = '0'
-            return redirect('/login/')
+            return render_template('login.html', message="無此使用者")
     else:
         return render_template('login.html')
 
