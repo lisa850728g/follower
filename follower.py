@@ -23,10 +23,10 @@ def regist():
     if request.method == 'POST':
         username = request.form['username']
         userpwd = request.form['userpwd']
+        usersex = request.form['usersex']
         client = MongoClient('localhost', 27017)
-        db = client['information']
-        table_usr = db.user
-        table_usr.insert_one({'account': username, 'password': userpwd})
+        tableUsr = client['information'].user
+        tableUsr.insert_one({'account': username, 'password': userpwd, 'sex': usersex})
         client.close()
         return "user '%s' regist ok!" % request.form['username']
     else:
