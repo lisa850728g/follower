@@ -13,9 +13,11 @@ def index():
     username = request.cookies.get('username')
     if not username:
         username = u'請先登入'
+    client = MongoClient('localhost', 27017)
+    tableUsr = client['information'].user
     islogin = session.get('islogin')
     nav_list = [u'首頁',u'個人資料',u'粉絲',u'追蹤中']
-    blog = {'title':'welcome to my page','content':'hello, welcome!'}
+    blog = {'title':'welcome to my page','users':tableUsr.find()}
     return render_template('index.html', nav_list=nav_list, username=username, blog = blog, islogin=islogin)
 
 @app.route('/reg', methods=['GET','POST'])
@@ -28,7 +30,7 @@ def regist():
         tableUsr = client['information'].user
         tableUsr.insert_one({'account': username, 'password': userpwd, 'sex': usersex})
         client.close()
-        return "註冊成功"
+        return redirect('/login/')
     else:
         return render_template('regis.html')
 
@@ -52,6 +54,7 @@ def login():
         else:
             session['islogin'] = '0'
             return render_template('login.html', message="無此使用者")
+        client.close()
     else:
         return render_template('login.html')
 

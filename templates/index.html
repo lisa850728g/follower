@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset='utf-8'/>
-    <title>Flask DEMO</title>
+    <title>Followers</title>
 </head>
 <body>
     <div class="header">
@@ -23,6 +23,16 @@
         <div class="item">
             <h1>{{blog['title']}}</h1>
             <div class="content">
+              {%if islogin == '1' %}
+                <table>
+                  {%for userInfo in blog['users']%}
+                    <tr>
+                      <td>{{userInfo['account']}}</td>
+                      <td>{{userInfo['sex']}}</td>
+                    </tr>
+                  {%endfor%}
+                </table>
+              {%endif%}
             </div>
         </div>
     </div>
