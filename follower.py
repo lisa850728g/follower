@@ -8,17 +8,35 @@ from pymongo import MongoClient
 app = Flask(__name__)
 app.secret_key = "dk54pgk42u/4nau4ul4g"
 
-@app.route('/')
+@app.route('/home')
 def index():
     username = request.cookies.get('username')
-    if not username:
-        username = u'請先登入'
     client = MongoClient('localhost', 27017)
-    tableUsr = client['information'].user
+    collectUsr = client['information'].user
+
+    if not username:
+        session['islogin'] = '0'
+        username = u'登入'
+
+    usrInfo = collectUsr.find_one({"account":username})
+    usrList = collectUsr.find({"account": {"$ne":username} })
+
     islogin = session.get('islogin')
     nav_list = [u'首頁',u'個人資料',u'粉絲',u'追蹤中']
-    blog = {'title':'welcome to my page','users':tableUsr.find()}
+    blog = {'title':'welcome to my page','users':usrList, 'userInfo':usrInfo}
+    client.close()
     return render_template('index.html', nav_list=nav_list, username=username, blog = blog, islogin=islogin)
+
+# def follow(follower,fan):
+#     client = MongoClient('localhost', 27017)
+#     collectUsr = client['information'].user
+#     sql = {'account':follower}
+#     for addFan in collectUsr.find(sql):
+#         old_amt_fan = addFan['amt_fan']
+#         old_fan = addFan['fan']
+#     newvalues = {'$set': {'amt_fan':old_amt_fan+1, 'fan':old_fan.append(fan)}
+#     collectUsr.update(sql,newvalues)
+#     return render_template('index.html', nav_list=nav_list, username=username, blog = blog, islogin=islogin)
 
 @app.route('/reg', methods=['GET','POST'])
 def regist():
@@ -27,24 +45,24 @@ def regist():
         userpwd = request.form['userpwd']
         usersex = request.form['usersex']
         client = MongoClient('localhost', 27017)
-        tableUsr = client['information'].user
-        tableUsr.insert_one({'account': username, 'password': userpwd, 'sex': usersex})
+        collectUsr = client['information'].user
+        collectUsr.insert_one({'account':username, 'password':userpwd, 'sex':usersex, 'amt_follower':0,'follower':[],'amt_fan':0,'fan':[]})
         client.close()
         return redirect('/login/')
     else:
         return render_template('regis.html')
 
-@app.route('/login/', methods=['GET','POST'])
+@app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
         userpwd = request.form.get('userpwd')
         client = MongoClient('localhost', 27017)
-        tableUsr = client['information'].user
-        userlist = tableUsr.distinct('account')
+        collectUsr = client['information'].user
+        userlist = collectUsr.distinct('account')
         if username in userlist :
-            if userpwd == tableUsr.find_one({'account': username})['password'] :
-                response = make_response(redirect('/'))
+            if userpwd == collectUsr.find_one({'account': username})['password'] :
+                response = make_response(redirect('/home'))
                 response.set_cookie('username', value=username, max_age=300)
                 session['islogin'] = '1'
                 return response
