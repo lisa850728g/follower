@@ -19,7 +19,15 @@ def index():
         username = u'登入'
 
     usrInfo = collectUsr.find_one({"account":username})
-    usrList = collectUsr.find({"account": {"$ne":username} })
+
+    def sortBySex(usrSex):
+        num = {
+            "girl" : -1,
+            "boy" : 1
+        }
+        return num.get(usrSex, 1)
+
+    usrList = collectUsr.find({"account": {"$ne":username} }).sort([("sex",sortBySex(usrInfo['sex']))])
 
     islogin = session.get('islogin')
     nav_list = [u'首頁',u'個人資料',u'粉絲',u'追蹤中']
@@ -52,7 +60,7 @@ def regist():
     else:
         return render_template('regis.html')
 
-@app.route('/login', methods=['GET','POST'])
+@app.route('/', methods=['GET','POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
