@@ -9,21 +9,22 @@
 <body>
   <div class="header">
     {%if islogin == '1' %}
-    <h1>Welcome ,{{username}}!</h1>
-      <h4>
+    <h1>Welcome ,{{username}}!</h1><a href="/logout">登出<a>
+    <h4>
         性別 {{blog['userInfo']['sex']}}
         <br>追蹤人數 {{blog['userInfo']['amt_follower']}}
+        <br>追蹤人 {{blog['userInfo']['follower']}}
         <br>粉絲人數 {{blog['userInfo']['amt_fan']}}
-      </h4>
-    {%else%}
-    <h1>請先<a href="/login">{{username}}<a>!</h1> {%endif%}
-    <div class="nav">
-      <ul>
-        {%for nav in nav_list%}
-        <li><a href="{{nav}}">{{nav}}</a></li>
-        {%endfor%}
-      </ul>
-    </div>
+        <br>粉絲 {{blog['userInfo']['fan']}}
+        <div class="nav">
+          <ul>
+            {%for nav in nav_list%}
+            <li><a href="{{nav}}">{{nav}}</a></li>
+            {%endfor%}
+          </ul>
+        </div>
+      </h4> {%else%}
+    <h1>請先<a href="/">{{username}}<a>!</h1> {%endif%}
   </div>
   <div class="container">
     <div class="item">
@@ -41,16 +42,21 @@
             {%endif%}
           </tr>
           {%for usersInfo in blog['users']%}
-          <tr>
-            <td>{{usersInfo['account']}}</td>
-            <td>{{usersInfo['sex']}}</td>
-            <td>{{usersInfo['amt_follower']}}</td>
-            <td>{{usersInfo['amt_fan']}}</td>
-            {%if islogin == '1' %}
-            <td>{{relationship}}</td>
-            <td><a href="follow()">追蹤</a></td>
-            {%endif%}
-          </tr>
+          <form method="post" action="/home">
+            <tr>
+              <td>{{usersInfo['account']}}</td>
+              <td>{{usersInfo['sex']}}</td>
+              <td>{{usersInfo['amt_follower']}}</td>
+              <td>{{usersInfo['follower']}}</td>
+              <td>{{usersInfo['amt_fan']}}</td>
+              <td>{{usersInfo['fan']}}</td>
+              {%if islogin == '1' %}
+              <td>{{relationship}}</td>
+              <!-- <td><input type="submit" name="btn_follow" value="追蹤" /></td> -->
+              <td><a href="/home/follow={{usersInfo['account']}}">追蹤</a></td>
+              {%endif%}
+            </tr>
+          </form>
           {%endfor%}
         </table>
       </div>

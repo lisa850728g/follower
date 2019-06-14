@@ -17,34 +17,56 @@ def index():
     if not username:
         session['islogin'] = '0'
         username = u'登入'
+        usrList = collectUsr.find()
+        blog = {'title':'welcome','users':usrList}
 
-    usrInfo = collectUsr.find_one({"account":username})
+    else:
+        usrInfo = collectUsr.find_one({"account":username})
 
-    def sortBySex(usrSex):
-        num = {
-            "girl" : -1,
-            "boy" : 1
-        }
-        return num.get(usrSex, 1)
+        def sortBySex(usrSex):
+            num = {
+                "girl" : -1,
+                "boy" : 1
+            }
+            return num.get(usrSex, 1)
 
-    usrList = collectUsr.find({"account": {"$ne":username} }).sort([("sex",sortBySex(usrInfo['sex']))])
+        usrList = collectUsr.find({"account": {"$ne":username} }).sort([("sex",sortBySex(usrInfo['sex']))])
+        blog = {'title':'welcome to my page','users':usrList, 'userInfo':usrInfo}
 
-    islogin = session.get('islogin')
     nav_list = [u'首頁',u'個人資料',u'粉絲',u'追蹤中']
-    blog = {'title':'welcome to my page','users':usrList, 'userInfo':usrInfo}
     client.close()
-    return render_template('index.html', nav_list=nav_list, username=username, blog = blog, islogin=islogin)
+    islogin = session.get('islogin')
+    return render_template('index.html', nav_list=nav_list, username=username,blog = blog, islogin=islogin)
 
-# def follow(follower,fan):
+# @app.route('/home/follow=<string:toFollow>',methods=['POST'])
+# def follow(toFollow):
 #     client = MongoClient('localhost', 27017)
 #     collectUsr = client['information'].user
-#     sql = {'account':follower}
-#     for addFan in collectUsr.find(sql):
-#         old_amt_fan = addFan['amt_fan']
-#         old_fan = addFan['fan']
-#     newvalues = {'$set': {'amt_fan':old_amt_fan+1, 'fan':old_fan.append(fan)}
-#     collectUsr.update(sql,newvalues)
-#     return render_template('index.html', nav_list=nav_list, username=username, blog = blog, islogin=islogin)
+#     username = request.cookies.get('username')
+#
+#     if not username:
+#         session['islogin'] = '0'
+#         username = u'登入'
+#
+#     sql = {'account':toFollow}
+#     old_amt_fan = collectUsr.find_one(sql)['amt_fan']
+#     newFanNum = {'$set': {'amt_fan':old_amt_fan+1}}
+#     collectUsr.update(sql,newFanNum)
+#     newFanName = {'$addToSet': {'fan':username}}
+#     collectUsr.update(sql,newFanName)
+#
+#     sql2 = {'account':username}
+#     old_amt_follower2 = collectUsr.find_one(sql2)['amt_follower']
+#     newFollowerNum = {'$set': {'amt_follower':old_amt_follower2+1}}
+#     collectUsr.update(sql2,newFollowerNum)
+#     newFollowerName = {'$addToSet': {'follow':toFollow}}
+#     collectUsr.update(sql,newFollowerName)
+#
+#     usrInfo = collectUsr.find_one({"account":username})
+#     usrList = collectUsr.find({"account": {"$ne":username} })
+#     blog = {'title':'welcome to my page','users':usrList, 'userInfo':usrInfo}
+#     client.close()
+#     return render_template('index.html', blog = blog)
 
 @app.route('/reg', methods=['GET','POST'])
 def regist():
@@ -56,7 +78,7 @@ def regist():
         collectUsr = client['information'].user
         collectUsr.insert_one({'account':username, 'password':userpwd, 'sex':usersex, 'amt_follower':0,'follower':[],'amt_fan':0,'fan':[]})
         client.close()
-        return redirect('/login/')
+        return redirect('/login')
     else:
         return render_template('regis.html')
 
@@ -83,6 +105,13 @@ def login():
         client.close()
     else:
         return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('islogin',0)
+    response = make_response(redirect('/home'))
+    response.set_cookie('username', '', expires=0)
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True,host='0.0.0.0',port=5000)
