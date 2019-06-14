@@ -8,7 +8,7 @@ from pymongo import MongoClient
 app = Flask(__name__)
 app.secret_key = "dk54pgk42u/4nau4ul4g"
 
-@app.route('/home')
+@app.route('/')
 def index():
     username = request.cookies.get('username')
     client = MongoClient('localhost', 27017)
@@ -38,7 +38,7 @@ def index():
     islogin = session.get('islogin')
     return render_template('index.html', nav_list=nav_list, username=username,blog = blog, islogin=islogin)
 
-# @app.route('/home/follow=<string:toFollow>',methods=['POST'])
+# @app.route('/follow=<string:toFollow>',methods=['POST'])
 # def follow(toFollow):
 #     client = MongoClient('localhost', 27017)
 #     collectUsr = client['information'].user
@@ -76,13 +76,17 @@ def regist():
         usersex = request.form['usersex']
         client = MongoClient('localhost', 27017)
         collectUsr = client['information'].user
-        collectUsr.insert_one({'account':username, 'password':userpwd, 'sex':usersex, 'amt_follower':0,'follower':[],'amt_fan':0,'fan':[]})
+        checkAccount = collectUsr.count({'account':username})
+        if checkAccount != 0:
+            return render_template('regis.html', message="此帳號已有人使用")
+        else:
+            collectUsr.insert_one({'account':username, 'password':userpwd, 'sex':usersex, 'amt_follower':0,'follower':[],'amt_fan':0,'fan':[]})
         client.close()
-        return redirect('/login')
+        return redirect('/log')
     else:
         return render_template('regis.html')
 
-@app.route('/', methods=['GET','POST'])
+@app.route('/log', methods=['GET','POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
@@ -92,7 +96,7 @@ def login():
         userlist = collectUsr.distinct('account')
         if username in userlist :
             if userpwd == collectUsr.find_one({'account': username})['password'] :
-                response = make_response(redirect('/home'))
+                response = make_response(redirect('/'))
                 response.set_cookie('username', value=username, max_age=300)
                 session['islogin'] = '1'
                 return response
@@ -109,7 +113,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('islogin',0)
-    response = make_response(redirect('/home'))
+    response = make_response(redirect('/'))
     response.set_cookie('username', '', expires=0)
     return response
 

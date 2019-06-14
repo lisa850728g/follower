@@ -24,7 +24,7 @@
           </ul>
         </div>
       </h4> {%else%}
-    <h1>請先<a href="/">{{username}}<a>!</h1> {%endif%}
+    <h1>請先<a href="/log">{{username}}<a>!</h1> {%endif%}
   </div>
   <div class="container">
     <div class="item">
@@ -42,7 +42,7 @@
             {%endif%}
           </tr>
           {%for usersInfo in blog['users']%}
-          <form method="post" action="/home">
+          <form method="post" action="">
             <tr>
               <td>{{usersInfo['account']}}</td>
               <td>{{usersInfo['sex']}}</td>
@@ -53,7 +53,7 @@
               {%if islogin == '1' %}
               <td>{{relationship}}</td>
               <!-- <td><input type="submit" name="btn_follow" value="追蹤" /></td> -->
-              <td><a href="/home/follow={{usersInfo['account']}}">追蹤</a></td>
+              <td><a href="/follow={{usersInfo['account']}}">追蹤</a></td>
               {%endif%}
             </tr>
           </form>
